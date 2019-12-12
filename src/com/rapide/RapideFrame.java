@@ -6,21 +6,33 @@ import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
 
-public class RapideFrame extends JFrame implements ActionListener{
+public class RapideFrame extends BaseListener {
 
 	protected String[] extendedNote = {"C","C#","D","D#","E","F","F#","G","G#","A","A#","B","CC"};
-	int[] Note = new int[5];
+	public ArrayList<Integer> note = new ArrayList<Integer>();
 	Engine engine;
-	int k = 0;
+	int k, m;
+	BaseListener listening;
+	
+	public enum STATE{
+		WAIT,
+		CONTINUE
+	}
+	
+	STATE st;
 	
 	public void setGUI(int width, int height) {
+		JFrame rapideFrame = new JFrame();
+		JScrollPane rapidePiano = new JScrollPane();
 		
 		BufferedImage image = null;
+		
 		try {
 			image = ImageIO.read(new File("bg1.jpg"));
 		} catch (IOException e) {
@@ -30,19 +42,20 @@ public class RapideFrame extends JFrame implements ActionListener{
 		Image bg = image.getScaledInstance(width, height, Image.SCALE_SMOOTH);
 		ImageIcon bg_image = new ImageIcon(bg);
 		
-        setTitle("Rapide");
-        setSize(width, height);
-        setLocationRelativeTo(null);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLayout(new BorderLayout());
-        setContentPane(new JLabel(bg_image));
-        setLayout(new FlowLayout());
+        rapideFrame.setTitle("Rapide");
+        rapideFrame.setSize(width, height);
+        rapideFrame.setLocationRelativeTo(null);
+        rapideFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        rapideFrame.setLayout(new BorderLayout());
+        rapideFrame.setContentPane(new JLabel(bg_image));
+        rapideFrame.setLayout(new FlowLayout());
         
-        JPanel keyPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
+        JPanel keyPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 0,0));
         
         JLayeredPane layer =  new JLayeredPane();
-        JButton[] key = new JButton[13];
-        		
+        layer.setSize(1120,150);
+        
+        JButton[] key = new JButton[13];		
        
         for (int i = 0; i < 13; i++) {
             key[i] = new JButton(extendedNote[i]);
@@ -53,30 +66,29 @@ public class RapideFrame extends JFrame implements ActionListener{
 	            	key[i].setBackground(Color.white);
 	            	key[i].setLocation(i*40, width/2);
 	            	key[i].setPreferredSize(new Dimension(40, 150));
-	            	layer.add(key[i], 0);
 	            	break;
 	            case 1: case 3: case 6: case 8: case 10:
 	            	key[i].setBackground(Color.black);
 	            	key[i].setLocation(25 + i*40, width/2);
 	            	key[i].setPreferredSize(new Dimension(30, 90));
-	            	layer.add(key[i], 1);
 	            	break;
             }
             keyPanel.add(key[i]);
         }
         
-        add(keyPanel);
+        rapidePiano.setViewportView(layer);
+        rapideFrame.add(keyPanel);
         
-        engine = new Engine();
-        setResizable(false);
-        setVisible(true);
+        engine = new Engine(this);
+        rapideFrame.setResizable(false);
+        rapideFrame.setVisible(true);
+        
         engine.logicPlay();
     }
 	
-	public void actionPerformed(ActionEvent e) {
+	protected void doPerformAction(ActionEvent e) {
 		// TODO Auto-generated method stub
 		int finalNote = 0;
-//		int[] arr = new int[5];
 		
         Object source = e.getSource();
         if (source instanceof JButton) {
@@ -84,32 +96,27 @@ public class RapideFrame extends JFrame implements ActionListener{
             System.out.print(but.getText());
 
             finalNote = (5*12) + Arrays.asList(extendedNote).indexOf(but.getText());
-//            finalNote = (5 * 12) + extendedNote.indexOf(but.getText());
 
             System.out.print(" (" + finalNote + ")\n");
+            
+            engine.playNote(finalNote);
+            addNote(finalNote);
+            System.out.println(note.get(0));
+            k++;
         }
         
-        engine.playNote(finalNote);
-//        setNote(arr);
-//        System.out.println("setnote");
+        if(k%5==0) {
+        	listening.setActive(false);
+        	m = 0;
+        	k = 0;
+        }
 	}
 
-	public void setNote(int[] note) {
-		Note = note;
-		setK();
-		System.out.println("suda di set");
+	private void addNote(int key){
+		note.add(key);
 	}
 	
-	public int[] getNote() {	
-		return Note;
-	}
-	
-	public void setK() {
-		k = k+1;
-		System.out.println("Masuk setk");
-	}
-	public int getK() {
-		System.out.println("masuk getk");
-		return k;
+	public ArrayList<Integer> getList(){
+		return note;
 	}
 }

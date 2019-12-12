@@ -1,7 +1,6 @@
 package com.rapide;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.*;
 import java.util.*;
 
 import javax.sound.midi.*;
@@ -14,29 +13,36 @@ public class Engine extends RapideFrame implements ActionListener {
 	private int rand, fin;
 	JPanel scoreBoard;
 	JLabel score, labelScore;
-	private boolean playing = false;
+	boolean playing = false;
+	private boolean score_val = true;
+	RapideFrame fr;
 	int n;
-//	ActionEvent e;
+	ActionEvent e;
 	
-	public Engine() {
+	public Engine(RapideFrame f) {
 		this.scoreBoard = new JPanel();
 		this.labelScore = new JLabel("Score: ");
 		this.score = new JLabel("0");
 		this.scoreBoard.add(this.labelScore);
 		this.scoreBoard.add(this.score);
+		this.fr = f;
 	}
 	
 	public void logicPlay() {
 		playing = true;
-		int[] arr_r = new int[5];
-		int[] arr_u = new int[5];
-		RapideFrame fr = new RapideFrame();
+		int[] arr_r = new int[6];
+		ArrayList<Integer> temp;
+		
+		Thread tr = new Thread();
 		
 		while(playing) {
+			fr.listening.setActive(true);
+			fr.m = 0;
+			
 			n = 5;
+			int i = 0;
+			
 			while(n>0) {
-				int i = 0;
-				
 				try {
 					Thread.sleep(500);
 				}catch(InterruptedException e) {
@@ -54,42 +60,49 @@ public class Engine extends RapideFrame implements ActionListener {
 				n--;
 			}
 			
-//			synchronized (fr) {
-//				System.out.println("masuk wait");
-//				try {
-//					fr.wait();
-//				} catch (InterruptedException e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
-//				int x;
-//				x = fr.getK();
-//				if(x == 4) {
-//					fr.notify();
-//					System.out.println("masuk notify");
-//				}
-//				}
+			fr.st = STATE.WAIT;
+			System.out.println("jadi wait");
 			
-			try {
-				System.out.println("masuk sleep");
-				Thread.sleep(20000);
-			}catch(InterruptedException e) {
-				System.out.println("Interrupt");
+			
+			while((fr.st==STATE.WAIT)) {
+				try {
+					System.out.println("masuk synchro");	
+					tr.sleep(20000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				//tr.wait();
+				System.out.println("suda tr.sleep");
+
+				fr.st = STATE.CONTINUE;
 			}
-			
-			arr_u = fr.getNote();
-			System.out.println("panggil getnote");
-			
-			for(int j = 0; j < 5; j++) {
-				if(arr_u[j] == arr_r[j]) {
-					playing = true;
+				
+			temp = fr.getList();
+				
+			for(int z = 0; z < 5; z++){
+				System.out.println("in " + temp.get(z));
+				System.out.println("rand " + arr_r[z]);
+				
+				if(temp.get(z) == arr_r[z]) {
+					score_val = true;
+					System.out.println("true");
 				}else {
-					playing = false;
-				}	
+					score_val = false;
+					System.out.println("false");
+					break;
+				}
 			}
-			
+				
+			if(score_val == false) {
+				System.out.println("gameover");
+				playing = false;
+			}else {
+				System.out.println("level up");
+				playing = true;
+			}
 		}
-		}
+	}
 	
 	public void playNote(int Note) {
 		// TODO Auto-generated method stub
@@ -125,10 +138,5 @@ public class Engine extends RapideFrame implements ActionListener {
 		
 		System.out.print(" (" + Note + ")\n");
     }
-	
-	public void updateScore(int value)
-	{
-		score.setText(Integer.valueOf(value).toString());
-	}
 	
 }
