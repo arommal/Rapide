@@ -1,5 +1,6 @@
 package com.rapide;
 
+import java.awt.Color;
 import java.awt.event.*;
 import java.util.*;
 
@@ -18,6 +19,7 @@ public class Engine extends RapideFrame implements ActionListener {
 	RapideFrame fr;
 	int n;
 	ActionEvent e;
+	
 	
 	public Engine(RapideFrame f) {
 		this.scoreBoard = new JPanel();
@@ -105,7 +107,7 @@ public class Engine extends RapideFrame implements ActionListener {
 	}
 	
 	public void playNote(int note, JButton[] key) {
-		// TODO Auto-generated method stub
+		
 		try {
             Sequencer sequencer = MidiSystem.getSequencer();
             sequencer.open();
@@ -139,7 +141,22 @@ public class Engine extends RapideFrame implements ActionListener {
 		System.out.print(" (" + note + ")\n");
 		
 		int index = note - (5*12);
-		key[index].doClick(100);
+		
+		if(key[index].getBackground() == Color.white) {
+			key[index].setBackground(Color.decode("#FADF63"));
+			try {
+				Thread.sleep(250);
+			}catch(InterruptedException e) {}
+			
+			key[index].setBackground(Color.WHITE);
+		}else {
+			key[index].setBackground(Color.decode("#FADF63"));
+			try {
+				Thread.sleep(250);
+			}catch(InterruptedException e) {}
+			key[index].setBackground(Color.BLACK);
+		}
+		
     }
 	
 	public void playNote(int note) {

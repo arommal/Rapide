@@ -2,7 +2,6 @@ package com.rapide;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -31,9 +30,7 @@ public class RapideFrame extends BaseListener {
 	public void setGUI(int width, int height) {
 		JFrame rapideFrame = new JFrame();
 		JLayeredPane layer =  new JLayeredPane();
-		layer.setLocation(width/2, height/2);
-		rapideFrame.add(layer);
-        
+		
 		BufferedImage image = null;
 		try {
 			image = ImageIO.read(new File("bg1.jpg"));
@@ -41,17 +38,18 @@ public class RapideFrame extends BaseListener {
 		    e.printStackTrace();
 		}
 		Image bg = image.getScaledInstance(width, height, Image.SCALE_SMOOTH);
-		ImageIcon bg_image = new ImageIcon(bg);
-        
-        	
+		ImagePanel bg_panel = new ImagePanel(bg, width, height);
+		layer.add(bg_panel, -1, -1);
+		
+		rapideFrame.add(layer);
+		
         int keyIndex = 0;
         
         for (int i = 0; i < 8; i++) {
             key[keyIndex] = new JButton(extendedNote[keyIndex]);
             key[keyIndex].addActionListener(this);
-            
             key[keyIndex].setBackground(Color.white);
-            key[keyIndex].setLocation(i*60, 0);
+            key[keyIndex].setLocation((160+i*60), height-(height-125));
             key[keyIndex].setSize(60, 250);
         	layer.add(key[keyIndex], 0, -1);
         	keyIndex++;
@@ -59,9 +57,8 @@ public class RapideFrame extends BaseListener {
             if(i%7 != 2 && i%7 != 6 && keyIndex < 13) {
             	key[keyIndex] = new JButton(extendedNote[keyIndex]);
             	key[keyIndex].addActionListener(this);
-                
             	key[keyIndex].setBackground(Color.black);
-            	key[keyIndex].setLocation(40+(i*60), 0);
+            	key[keyIndex].setLocation(200+(i*60), height-(height-125));
             	key[keyIndex].setSize(40, 140);
             	layer.add(key[keyIndex], 1, -1);
             	keyIndex++;
@@ -74,7 +71,6 @@ public class RapideFrame extends BaseListener {
         rapideFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         rapideFrame.setResizable(false);
         rapideFrame.setVisible(true);
-        
         
         engine = new Engine(this);
         engine.logicPlay(key);
