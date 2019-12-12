@@ -28,14 +28,16 @@ public class Engine extends RapideFrame implements ActionListener {
 		this.fr = f;
 	}
 	
-	public void logicPlay() {
+	public void logicPlay(JButton[] key) {
 		playing = true;
 		int[] arr_r = new int[6];
 		ArrayList<Integer> temp;
+		fr.key = new JButton[14];
 		
 		Thread tr = new Thread();
 		
 		while(playing) {
+			fr.note = new ArrayList<Integer>();
 			fr.listening.setActive(true);
 			fr.m = 0;
 			
@@ -44,7 +46,7 @@ public class Engine extends RapideFrame implements ActionListener {
 			
 			while(n>0) {
 				try {
-					Thread.sleep(500);
+					Thread.sleep(250);
 				}catch(InterruptedException e) {
 					System.out.println("Interrupt");
 					playing = false;
@@ -54,7 +56,7 @@ public class Engine extends RapideFrame implements ActionListener {
 				fin = init + rand;
 				arr_r[i] = fin;
 				
-				playNote(fin);
+				playNote(fin, key);
 		
 				i++;
 				n--;
@@ -72,8 +74,6 @@ public class Engine extends RapideFrame implements ActionListener {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				//tr.wait();
-				System.out.println("suda tr.sleep");
 
 				fr.st = STATE.CONTINUE;
 			}
@@ -95,16 +95,16 @@ public class Engine extends RapideFrame implements ActionListener {
 			}
 				
 			if(score_val == false) {
-				System.out.println("gameover");
+				System.out.println("GAME OVER");
 				playing = false;
 			}else {
-				System.out.println("level up");
+				System.out.println("LEVEL UP");
 				playing = true;
 			}
 		}
 	}
 	
-	public void playNote(int Note) {
+	public void playNote(int note, JButton[] key) {
 		// TODO Auto-generated method stub
 		try {
             Sequencer sequencer = MidiSystem.getSequencer();
@@ -115,17 +115,17 @@ public class Engine extends RapideFrame implements ActionListener {
 //            MidiEvent event = null;
 
             ShortMessage first = new ShortMessage();
-            first.setMessage(192,1,1,0);
+            first.setMessage(192, 1, 1, 0);
             MidiEvent setInstrument = new MidiEvent(first, 1);
             track.add(setInstrument);
 
             ShortMessage a = new ShortMessage();
-            a.setMessage(144,1,Note,100);
+            a.setMessage(144, 1, note, 100);
             MidiEvent noteOn = new MidiEvent(a, 1);
             track.add(noteOn);
 
             ShortMessage b = new ShortMessage();
-            b.setMessage(128,1,Note,100);
+            b.setMessage(128, 1, note, 100);
             MidiEvent noteOff = new MidiEvent(b, 16);
             track.add(noteOff);
 
@@ -136,7 +136,46 @@ public class Engine extends RapideFrame implements ActionListener {
         	ex.printStackTrace();
         }
 		
-		System.out.print(" (" + Note + ")\n");
+		System.out.print(" (" + note + ")\n");
+		
+		int index = note - (5*12);
+		key[index].doClick(100);
+    }
+	
+	public void playNote(int note) {
+		// TODO Auto-generated method stub
+		try {
+            Sequencer sequencer = MidiSystem.getSequencer();
+            sequencer.open();
+            Sequence sequence = new Sequence(Sequence.PPQ,4);
+            Track track = sequence.createTrack();
+
+//            MidiEvent event = null;
+
+            ShortMessage first = new ShortMessage();
+            first.setMessage(192, 1, 1, 0);
+            MidiEvent setInstrument = new MidiEvent(first, 1);
+            track.add(setInstrument);
+
+            ShortMessage a = new ShortMessage();
+            a.setMessage(144, 1, note, 100);
+            MidiEvent noteOn = new MidiEvent(a, 1);
+            track.add(noteOn);
+
+            ShortMessage b = new ShortMessage();
+            b.setMessage(128, 1, note, 100);
+            MidiEvent noteOff = new MidiEvent(b, 16);
+            track.add(noteOff);
+
+            sequencer.setSequence(sequence);
+            sequencer.start();
+            
+        } catch (Exception ex) {
+        	ex.printStackTrace();
+        }
+		
+		System.out.print(" (" + note + ")\n");
+	
     }
 	
 }

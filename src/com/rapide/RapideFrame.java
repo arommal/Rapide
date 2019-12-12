@@ -14,8 +14,9 @@ import javax.swing.*;
 
 public class RapideFrame extends BaseListener {
 
-	protected String[] extendedNote = {"C","C#","D","D#","E","F","F#","G","G#","A","A#","B","CC"};
-	public ArrayList<Integer> note = new ArrayList<Integer>();
+	protected String[] extendedNote = {"C","C#","D","D#","E","F","F#","G","G#","A","A#","B","C'"};
+	public ArrayList<Integer> note;
+	JButton[] key = new JButton[14];
 	Engine engine;
 	int k, m;
 	BaseListener listening;
@@ -29,61 +30,54 @@ public class RapideFrame extends BaseListener {
 	
 	public void setGUI(int width, int height) {
 		JFrame rapideFrame = new JFrame();
-		JScrollPane rapidePiano = new JScrollPane();
-		
+		JLayeredPane layer =  new JLayeredPane();
+		layer.setLocation(width/2, height/2);
+		rapideFrame.add(layer);
+        
 		BufferedImage image = null;
-		
 		try {
 			image = ImageIO.read(new File("bg1.jpg"));
 		} catch (IOException e) {
 		    e.printStackTrace();
 		}
-		
 		Image bg = image.getScaledInstance(width, height, Image.SCALE_SMOOTH);
 		ImageIcon bg_image = new ImageIcon(bg);
-		
+        
+        	
+        int keyIndex = 0;
+        
+        for (int i = 0; i < 8; i++) {
+            key[keyIndex] = new JButton(extendedNote[keyIndex]);
+            key[keyIndex].addActionListener(this);
+            
+            key[keyIndex].setBackground(Color.white);
+            key[keyIndex].setLocation(i*60, 0);
+            key[keyIndex].setSize(60, 250);
+        	layer.add(key[keyIndex], 0, -1);
+        	keyIndex++;
+        	
+            if(i%7 != 2 && i%7 != 6 && keyIndex < 13) {
+            	key[keyIndex] = new JButton(extendedNote[keyIndex]);
+            	key[keyIndex].addActionListener(this);
+                
+            	key[keyIndex].setBackground(Color.black);
+            	key[keyIndex].setLocation(40+(i*60), 0);
+            	key[keyIndex].setSize(40, 140);
+            	layer.add(key[keyIndex], 1, -1);
+            	keyIndex++;
+            }
+        }
+        
         rapideFrame.setTitle("Rapide");
         rapideFrame.setSize(width, height);
         rapideFrame.setLocationRelativeTo(null);
         rapideFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        rapideFrame.setLayout(new BorderLayout());
-        rapideFrame.setContentPane(new JLabel(bg_image));
-        rapideFrame.setLayout(new FlowLayout());
-        
-        JPanel keyPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 0,0));
-        
-        JLayeredPane layer =  new JLayeredPane();
-        layer.setSize(1120,150);
-        
-        JButton[] key = new JButton[13];		
-       
-        for (int i = 0; i < 13; i++) {
-            key[i] = new JButton(extendedNote[i]);
-            key[i].addActionListener(this);
-            
-            switch(i) {
-	            case 0: case 2: case 4: case 5: case 7: case 9: case 11: case 12:
-	            	key[i].setBackground(Color.white);
-	            	key[i].setLocation(i*40, width/2);
-	            	key[i].setPreferredSize(new Dimension(40, 150));
-	            	break;
-	            case 1: case 3: case 6: case 8: case 10:
-	            	key[i].setBackground(Color.black);
-	            	key[i].setLocation(25 + i*40, width/2);
-	            	key[i].setPreferredSize(new Dimension(30, 90));
-	            	break;
-            }
-            keyPanel.add(key[i]);
-        }
-        
-        rapidePiano.setViewportView(layer);
-        rapideFrame.add(keyPanel);
-        
-        engine = new Engine(this);
         rapideFrame.setResizable(false);
         rapideFrame.setVisible(true);
         
-        engine.logicPlay();
+        
+        engine = new Engine(this);
+        engine.logicPlay(key);
     }
 	
 	protected void doPerformAction(ActionEvent e) {
@@ -101,7 +95,6 @@ public class RapideFrame extends BaseListener {
             
             engine.playNote(finalNote);
             addNote(finalNote);
-            System.out.println(note.get(0));
             k++;
         }
         
@@ -112,6 +105,10 @@ public class RapideFrame extends BaseListener {
         }
 	}
 
+	public void paintComponent(Graphics g) {
+		Image img = Toolkit.getDefaultToolkit().getImage("bg1.jpg");
+		g.drawImage(img, 0, 0, null);
+	}
 	private void addNote(int key){
 		note.add(key);
 	}
@@ -119,4 +116,5 @@ public class RapideFrame extends BaseListener {
 	public ArrayList<Integer> getList(){
 		return note;
 	}
+
 }
